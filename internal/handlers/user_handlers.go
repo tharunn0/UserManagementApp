@@ -1,10 +1,14 @@
 package handlers
 
 import (
-	"github.com/gin-gonic/gin"
+	"fmt"
+
+	"github.com/tharunn0/gin-server-gorm/internal/middleware/jwt"
 	"github.com/tharunn0/gin-server-gorm/internal/models"
 	"github.com/tharunn0/gin-server-gorm/internal/services"
-	"github.com/tharunn0/gin-server-gorm/pkg/logger"
+	log "github.com/tharunn0/gin-server-gorm/pkg/logger"
+
+	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
 
@@ -19,31 +23,26 @@ func NewHandler(h *services.UserService) *Handler {
 }
 
 func (h *Handler) GetHomePage(c *gin.Context) {
-	c.JSON(200, gin.H{
-		"message": "In the homepage",
-	})
-	logger.Logr.Info(
-		"INFO",
+	val, ok := c.Get("username")
+	if !ok {
+		return
+	}
+	username, _ := val.(string)
+	msg := "Hi " + username
+	c.JSON(200, gin.H{"message": msg})
+	log.Info("INFO",
 		zap.String("from", c.ClientIP()),
 		zap.String("to", c.Request.URL.Path),
 	)
-
 }
 
 func (h *Handler) CreateUser(c *gin.Context) {
 
 	var RegReq models.RegisterReq
-
-	// Email     string `json:"email"`
-	// 	Username  string `json:"username"`
-	// 	Firstname string `json:"first_name"`
-	// 	Lastname  string `json:"last_name"`
-	// 	Password  string `json:"password"`
-
 	er := c.ShouldBindJSON(&RegReq)
 	if er != nil {
-		logger.Logr.Error(
-			"ERROR",
+		log.Error(
+			"JSON Parse Error",
 			zap.Error(er),
 		)
 		return
@@ -51,8 +50,8 @@ func (h *Handler) CreateUser(c *gin.Context) {
 
 	er = h.Service.Create(&RegReq)
 	if er != nil {
-		logger.Logr.Error(
-			"ERROR",
+		log.Error(
+			"Service User Creation Error",
 			zap.Error(er),
 		)
 		return
@@ -61,5 +60,35 @@ func (h *Handler) CreateUser(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"message": "Registration Successful",
 	})
+
+}
+
+func (h *Handler) LogInUser(c *gin.Context) {
+
+	role, ok := jwt.ValidateToken(c.GetHeader("Authorization"))
+	if ok || role == "user" {
+		c.JSON(301, gin.H{"redirect": "/home"})
+		return
+	}
+
+	var LoginReq models.LoginReq
+
+	er := c.ShouldBindJSON(&LoginReq)
+	if er != nil {
+		log.Error("JSON Parsing", zap.Error(er))
+		return
+	}
+
+	userprofile, er := h.Service.LoginUser(&LoginReq)
+	if er != nil {
+		log.Error("LoginUser Error", zap.Error(er))
+		c.JSON(301, gin.H{"error": fmt.Sprintf("%s", er)})
+		return
+	}
+
+	token := jwt.Issue(userprofile.Username, "user")
+	log.Info("JWT Issued")
+
+	c.JSON(200, gin.H{"login": "Login successful", "jwt_token": token})
 
 }

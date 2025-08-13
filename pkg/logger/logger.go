@@ -7,20 +7,32 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-var Logr *zap.Logger
+var logr *zap.Logger
 
-func InitLogger() *zap.Logger {
+func InitLogger() {
 	cfg := zap.NewDevelopmentConfig()
 	cfg.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
+	cfg.DisableCaller = true
+	cfg.DisableStacktrace = true
 	logger, er := cfg.Build()
 	if er != nil {
 		log.Fatalln(er)
 	}
-	defer logger.Sync()
-	Logr = logger
-	return logger
+	logr = logger
 }
 
-func ZapLogger(lgr *zap.Logger) {
-
+func Info(msg string, fields ...zap.Field) {
+	logr.Info(msg, fields...)
+}
+func Warn(msg string, fields ...zap.Field) {
+	logr.Warn(msg, fields...)
+}
+func Error(msg string, fields ...zap.Field) {
+	logr.Error(msg, fields...)
+}
+func Panic(msg string, fields ...zap.Field) {
+	logr.Panic(msg, fields...)
+}
+func Fatal(msg string, fields ...zap.Field) {
+	logr.Fatal(msg, fields...)
 }

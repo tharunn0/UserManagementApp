@@ -1,12 +1,16 @@
 package services
 
 import (
+	"fmt"
+
 	"github.com/tharunn0/gin-server-gorm/internal/models"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type UserRepositoryIf interface {
 	RegisterUser(user *models.User) error
+	GetUserByEmail(email string) (*models.User, error)
+	GetAllUsers() ([]*models.User, error)
 }
 
 type UserService struct {
@@ -24,7 +28,7 @@ func (u *UserService) Create(rq *models.RegisterReq) error {
 
 	hashedpass, er := bcrypt.GenerateFromPassword([]byte(rq.Password), bcrypt.DefaultCost)
 	if er != nil {
-		return er
+		return fmt.Errorf("services.GenerateFromPassword : %w/n", er)
 	}
 
 	user = &models.User{
@@ -43,4 +47,57 @@ func (u *UserService) Create(rq *models.RegisterReq) error {
 		return er
 	}
 	return nil
+}
+
+func (u *UserService) LoginUser(rq *models.LoginReq) (*models.UserProfile, error) {
+
+	var userprofile *models.UserProfile
+
+	email := rq.Email
+	password := rq.Password
+
+	user, er := u.repository.GetUserByEmail(email)
+	if er != nil {
+		return nil, er
+	}
+
+	er = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	if er != nil {
+		return nil, fmt.Errorf("Wrong passowrd !")
+	}
+
+	userprofile = &models.UserProfile{
+		Username:  user.Username,
+		Email:     user.Email,
+		Firstname: user.Firstname,
+		Lastname:  user.Lastname,
+		IsAdmin:   user.IsAdmin,
+	}
+
+	return userprofile, nil
+
+}
+
+func (u *UserService) GetAllUsers() ([]*models.UserProfile, error) {
+	var userprofiles []*models.UserProfile
+
+	users, er := u.repository.GetAllUsers()
+	if er != nil {
+		return nil, er
+	}
+
+	var up *models.UserProfile
+	for _, u := range users {
+
+		up = &models.UserProfile{
+			Email:     u.Email,
+			Username:  u.Username,
+			Firstname: u.Firstname,
+			Lastname:  u.Lastname,
+		}
+
+		userprofiles = append(userprofiles, up)
+	}
+
+	return userprofiles, nil
 }

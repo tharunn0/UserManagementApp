@@ -19,10 +19,22 @@ type User struct {
 	CreatedAt  time.Time `gorm:"default:now()"`
 	UpdatedAt  time.Time `gorm:"default:now()"`
 }
+type UserProfile struct {
+	Email     string `json:"email"`
+	Username  string `json:"username"`
+	Firstname string `json:"first_name"`
+	Lastname  string `json:"last_name"`
+	IsAdmin   bool
+}
 type RegisterReq struct {
 	Email     string `json:"email"`
 	Username  string `json:"username"`
 	Firstname string `json:"first_name"`
 	Lastname  string `json:"last_name"`
 	Password  string `json:"password"`
+}
+
+type LoginReq struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }

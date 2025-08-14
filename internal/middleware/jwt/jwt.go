@@ -58,6 +58,56 @@ func ValidateMiddleware() gin.HandlerFunc {
 		if claims, ok := jtoken.Claims.(jwt.MapClaims); ok {
 			username := claims["username"].(string)
 			role := claims["role"].(string)
+			if role != "user" {
+				c.JSON(401, gin.H{"Unauthorized": "Login as user to continue"})
+				c.Abort()
+				return
+			}
+			c.Set("username", username)
+			c.Set("role", role)
+		} else {
+			c.JSON(401, gin.H{"error": "Invalid token claims"})
+			c.Abort()
+			return
+		}
+
+		c.Next()
+	}
+}
+func ValidateMiddlewareAdmin() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// extracting authorization header from the req
+		authHeader := c.GetHeader("Authorization")
+		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
+			c.JSON(401, gin.H{"error": "Login to access page"})
+			log.Warn("No Jwt Found")
+			c.Abort()
+			return
+		}
+		// extracted the token into authstring
+		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+		// validating signature
+		jtoken, er := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("Jwt signing algorithm mismatch")
+			}
+			return []byte(os.Getenv("HS_256KEY")), nil
+		})
+		if er != nil || !jtoken.Valid {
+			c.JSON(401, gin.H{"error": "Auth token is invalid"})
+			c.Abort()
+			return
+		}
+		// validating the claims
+		if claims, ok := jtoken.Claims.(jwt.MapClaims); ok {
+			username := claims["username"].(string)
+			role := claims["role"].(string)
+
+			if role != "admin" {
+				c.JSON(401, gin.H{"Unauthorized": "Login as admin to continue"})
+				c.Abort()
+				return
+			}
 
 			c.Set("username", username)
 			c.Set("role", role)
@@ -71,30 +121,63 @@ func ValidateMiddleware() gin.HandlerFunc {
 	}
 }
 
-func ValidateToken(authHeader string) (string, bool) {
+// func ValidateToken(authHeader string) bool {
 
-	if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
-		return "", false
-	}
-	// extracted the token into authstring
-	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+// 	if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
+// 		return false
+// 	}
+// 	// extracted the token into authstring
+// 	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 
-	jtoken, er := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("Jwt signing algorithm mismatch")
-		}
-		return []byte(os.Getenv("HS_256KEY")), nil
-	})
-	if er != nil || !jtoken.Valid {
-		return "", false
-	}
+// 	jtoken, er := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
+// 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+// 			return nil, fmt.Errorf("Jwt signing algorithm mismatch")
+// 		}
+// 		return []byte(os.Getenv("HS_256KEY")), nil
+// 	})
+// 	if er != nil || !jtoken.Valid {
+// 		return false
+// 	}
 
-	if claims, ok := jtoken.Claims.(jwt.MapClaims); ok {
-		r, _ := claims["role"]
-		role, _ := r.(string)
-		return role, true
-	}
+// 	if claims, ok := jtoken.Claims.(jwt.MapClaims); ok {
+// 		r, _ := claims["role"]
+// 		role, _ := r.(string)
+// 		if role == "user" {
 
-	return "", false
+// 			return true
+// 		}
+// 	}
 
-}
+// 	return false
+
+// }
+
+// func ValidateTokenAdmin(authHeader string) bool {
+
+// 	if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
+// 		return false
+// 	}
+// 	// extracted the token into authstring
+// 	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+
+// 	jtoken, er := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
+// 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+// 			return nil, fmt.Errorf("Jwt signing algorithm mismatch")
+// 		}
+// 		return []byte(os.Getenv("HS_256KEY")), nil
+// 	})
+// 	if er != nil || !jtoken.Valid {
+// 		return false
+// 	}
+
+// 	if claims, ok := jtoken.Claims.(jwt.MapClaims); ok {
+// 		r, _ := claims["role"]
+// 		role, _ := r.(string)
+// 		if role == "admin" {
+// 			return true
+// 		}
+// 	}
+
+// 	return false
+
+// }

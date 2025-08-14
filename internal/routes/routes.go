@@ -16,19 +16,19 @@ func RegisterRoutes(r *gin.Engine, handler *handlers.Handler) {
 	userRoute.Use(jwt.ValidateMiddleware())
 	{
 		userRoute.GET("/home", handler.GetHomePage)
-		// userRoute.GET("/profile", handler.GetUserProfile)
+		userRoute.GET("/profile", handler.GetUserProfile)
 		// userRoute.GET("/uploads", handler.GetUploads)
 		// userRoute.POST("/logout", handler.LogOutUser)
 		// userRoute.POST("/reset-password", handler.ResetUserPassword)
 	}
 
 	adminRoute := r.Group("/admin")
-	adminRoute.Use(jwt.ValidateMiddleware())
+	adminRoute.Use(jwt.ValidateMiddlewareAdmin())
 	// {
 	// 	adminRoute.POST("/create", handler.CreateAdmin)
 	adminRoute.GET("/dashboard", handler.GetAdminDashboard)
 	adminRoute.GET("/getusers", handler.GetAllUsers)
-	// 	adminRoute.DELETE("/users", handler.DeleteUser)
+	adminRoute.DELETE("/users", handler.DeleteUser)
 	// }
 
 }

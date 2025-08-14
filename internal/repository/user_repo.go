@@ -29,7 +29,15 @@ func (repo *UserRepository) GetUserByEmail(email string) (*models.User, error) {
 	var user *models.User
 	tx := repo.pgdb.Where("email = ?", email).First(&user)
 	if tx.Error != nil {
-		return nil, fmt.Errorf("repository.LoginUser : %w/n", tx.Error)
+		return nil, fmt.Errorf("repository.GetUserByEmail : %w/n", tx.Error)
+	}
+	return user, nil
+}
+func (repo *UserRepository) GetUserByUsername(username string) (*models.User, error) {
+	var user *models.User
+	tx := repo.pgdb.Where("username = ?", username).First(&user)
+	if tx.Error != nil {
+		return nil, fmt.Errorf("repository.GetUserByUsername : %w/n", tx.Error)
 	}
 	return user, nil
 }

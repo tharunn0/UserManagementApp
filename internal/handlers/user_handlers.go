@@ -65,12 +65,6 @@ func (h *Handler) CreateUser(c *gin.Context) {
 
 func (h *Handler) LogInUser(c *gin.Context) {
 
-	role, ok := jwt.ValidateToken(c.GetHeader("Authorization"))
-	if ok || role == "user" {
-		c.JSON(301, gin.H{"redirect": "/home"})
-		return
-	}
-
 	var LoginReq models.LoginReq
 
 	er := c.ShouldBindJSON(&LoginReq)
@@ -90,5 +84,30 @@ func (h *Handler) LogInUser(c *gin.Context) {
 	log.Info("JWT Issued")
 
 	c.JSON(200, gin.H{"login": "Login successful", "jwt_token": token})
+
+}
+
+func (h *Handler) GetUserProfile(c *gin.Context) {
+
+	u, ok := c.Get("username")
+	if !ok {
+
+	}
+	username := u.(string)
+	var userprofile *models.UserProfile
+
+	userprofile, er := h.Service.GetUserProfile(username)
+	if er != nil {
+		log.Warn("GetUserProfile Error ", zap.Error(er))
+		c.JSON(305, gin.H{"error": "Couldnt get user"})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"email":      userprofile.Email,
+		"username":   username,
+		"first name": userprofile.Firstname,
+		"last name":  userprofile.Lastname,
+	})
 
 }

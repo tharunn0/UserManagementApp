@@ -11,11 +11,6 @@ import (
 )
 
 func (h *Handler) AdminLogin(c *gin.Context) {
-	role, ok := jwt.ValidateToken(c.GetHeader("Authorization"))
-	if ok || role == "admin" {
-		c.JSON(200, gin.H{"redirect": "/admin/dashboard"})
-		return
-	}
 
 	var LoginReq models.LoginReq
 
@@ -37,7 +32,7 @@ func (h *Handler) AdminLogin(c *gin.Context) {
 		return
 	}
 
-	token := jwt.Issue(userprofile.Username, "user")
+	token := jwt.Issue(userprofile.Username, "admin")
 	log.Info("JWT Issued")
 
 	c.JSON(200, gin.H{"login": "Login successful", "jwt_token": token, "redirect": "/admin/dashboard"})
@@ -66,5 +61,9 @@ func (h *Handler) GetAllUsers(c *gin.Context) {
 	}
 
 	c.JSON(200, res)
+
+}
+
+func (h *Handler) DeleteUser(c *gin.Context) {
 
 }

@@ -10,6 +10,7 @@ import (
 type UserRepositoryIf interface {
 	RegisterUser(user *models.User) error
 	GetUserByEmail(email string) (*models.User, error)
+	GetUserByUsername(username string) (*models.User, error)
 	GetAllUsers() ([]*models.User, error)
 }
 
@@ -100,4 +101,24 @@ func (u *UserService) GetAllUsers() ([]*models.UserProfile, error) {
 	}
 
 	return userprofiles, nil
+}
+
+func (s *UserService) GetUserProfile(username string) (*models.UserProfile, error) {
+
+	var userprofile *models.UserProfile
+
+	user, er := s.repository.GetUserByUsername(username)
+	if er != nil {
+		return nil, er
+	}
+
+	userprofile = &models.UserProfile{
+		Email:     user.Email,
+		Username:  user.Username,
+		Firstname: user.Firstname,
+		Lastname:  user.Lastname,
+	}
+
+	return userprofile, nil
+
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/tharunn0/gin-server-gorm/internal/models"
+
 	"gorm.io/gorm"
 )
 
@@ -50,4 +51,17 @@ func (repo *UserRepository) GetAllUsers() ([]*models.User, error) {
 		return nil, tx.Error
 	}
 	return users, nil
+}
+
+func (repo *UserRepository) DeleteUserByUsername(username string) error {
+
+	tx := repo.pgdb.Table("users").Where("username = ?", username).Delete(nil)
+
+	fmt.Println("the username to delete is ", username)
+
+	if tx.Error != nil || tx.RowsAffected == 0 {
+		return fmt.Errorf("repository.DeleteUserByUsername : %w/n", tx.Error)
+	}
+	fmt.Println("there is no error")
+	return nil
 }

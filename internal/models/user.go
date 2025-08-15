@@ -19,6 +19,7 @@ type User struct {
 	CreatedAt  time.Time `gorm:"default:now()"`
 	UpdatedAt  time.Time `gorm:"default:now()"`
 }
+
 type UserProfile struct {
 	Email     string `json:"email"`
 	Username  string `json:"username"`
@@ -26,6 +27,7 @@ type UserProfile struct {
 	Lastname  string `json:"last_name"`
 	IsAdmin   bool
 }
+
 type RegisterReq struct {
 	Email     string `json:"email"`
 	Username  string `json:"username"`

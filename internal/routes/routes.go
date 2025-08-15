@@ -28,7 +28,7 @@ func RegisterRoutes(r *gin.Engine, handler *handlers.Handler) {
 	// 	adminRoute.POST("/create", handler.CreateAdmin)
 	adminRoute.GET("/dashboard", handler.GetAdminDashboard)
 	adminRoute.GET("/getusers", handler.GetAllUsers)
-	adminRoute.DELETE("/users", handler.DeleteUser)
+	adminRoute.DELETE("/delete/:username", handler.DeleteUser)
 	// }
 
 }

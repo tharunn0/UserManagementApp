@@ -2,7 +2,9 @@ package middleware
 
 import (
 	"github.com/gin-gonic/gin"
+
 	log "github.com/tharunn0/gin-server-gorm/pkg/logger"
+
 	"go.uber.org/zap"
 )
 

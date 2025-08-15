@@ -10,14 +10,17 @@ import (
 var logr *zap.Logger
 
 func InitLogger() {
+
 	cfg := zap.NewDevelopmentConfig()
 	cfg.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
 	cfg.DisableCaller = true
 	cfg.DisableStacktrace = true
+
 	logger, er := cfg.Build()
 	if er != nil {
 		log.Fatalln(er)
 	}
+
 	logr = logger
 }
 

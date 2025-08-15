@@ -3,10 +3,11 @@ package handlers
 import (
 	"fmt"
 
-	"github.com/gin-gonic/gin"
 	"github.com/tharunn0/gin-server-gorm/internal/middleware/jwt"
 	"github.com/tharunn0/gin-server-gorm/internal/models"
 	log "github.com/tharunn0/gin-server-gorm/pkg/logger"
+
+	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
 
@@ -65,5 +66,15 @@ func (h *Handler) GetAllUsers(c *gin.Context) {
 }
 
 func (h *Handler) DeleteUser(c *gin.Context) {
+	username := c.Param("username")
+
+	er := h.Service.DeleteUserByUsername(username)
+	if er != nil {
+		log.Info("DELETE", zap.String("message", "User deletion has been sucessfull"))
+		c.JSON(404, gin.H{"error": "user not found"})
+		return
+	}
+	log.Info("DELETE", zap.String("error", "User deletion has not been sucessfull"))
+	c.JSON(200, gin.H{"message": "User deleted successfully"})
 
 }

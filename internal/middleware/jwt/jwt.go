@@ -6,9 +6,10 @@ import (
 	"strings"
 	"time"
 
+	log "github.com/tharunn0/gin-server-gorm/pkg/logger"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
-	log "github.com/tharunn0/gin-server-gorm/pkg/logger"
 	"go.uber.org/zap"
 )
 

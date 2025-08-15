@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/tharunn0/gin-server-gorm/internal/models"
+
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -12,6 +13,7 @@ type UserRepositoryIf interface {
 	GetUserByEmail(email string) (*models.User, error)
 	GetUserByUsername(username string) (*models.User, error)
 	GetAllUsers() ([]*models.User, error)
+	DeleteUserByUsername(username string) error
 }
 
 type UserService struct {
@@ -121,4 +123,12 @@ func (s *UserService) GetUserProfile(username string) (*models.UserProfile, erro
 
 	return userprofile, nil
 
+}
+
+func (s *UserService) DeleteUserByUsername(username string) error {
+	er := s.repository.DeleteUserByUsername(username)
+	if er != nil {
+		return er
+	}
+	return nil
 }

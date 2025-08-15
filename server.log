@@ -1,0 +1,2 @@
+2025-08-15T09:14:35.512+0530	WARN	WARN	{"message": "this is a warn log"}
+2025-08-15T09:14:35.512+0530	ERROR	ERROR	{"message": "this is a error log"}
